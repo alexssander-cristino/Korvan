@@ -1,6 +1,6 @@
 import {
-  Activity, AlertTriangle, ArrowDownRight, ArrowUpRight, Bell, Check,
-  ChevronDown, CircleHelp, Clock3, Command, Cpu, Database, Gauge,
+  Activity, AlertTriangle, ArrowUpRight, Bell, ChevronDown, CircleHelp,
+  Clock3, Cpu, Database, Gauge,
   LayoutDashboard, LifeBuoy, MoreHorizontal, Plus, Search, Server,
   Settings2, ShieldCheck, Signal, Workflow, Zap,
 } from "lucide-react";
