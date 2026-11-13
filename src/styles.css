@@ -233,3 +233,28 @@ footer{border-color:var(--border);color:#70849a}
 .overview-chart-note{margin:10px 0 0;color:var(--muted);font-size:9px;line-height:1.5}
 @media(max-width:900px){.overview-system-grid{grid-template-columns:1fr}}
 @media(max-width:520px){.overview-system-chart{padding:13px}.overview-chart-stats{gap:5px}.overview-chart-stats small{font-size:7px}.overview-chart-stats b{font-size:12px}.overview-bars{gap:2px}.overview-system-chart>footer{gap:9px}}
+
+/* Real HTTP request telemetry */
+.request-system-chart .request-bars{margin-bottom:15px}
+.request-status-block{padding:12px 0;border-top:1px solid var(--border)}
+.request-status-heading{display:flex;justify-content:space-between;gap:10px;margin-bottom:8px}
+.request-status-heading b,.request-top-routes>b{font-size:9px;color:var(--text)}
+.request-status-heading span{font-size:8px;color:var(--muted)}
+.request-status-stack{display:flex;height:8px;overflow:hidden;border-radius:10px;background:#263445;gap:2px}
+.request-status-stack i{display:block;min-width:0}
+.http-2xx{background:var(--green)}
+.http-3xx{background:var(--blue)}
+.http-4xx{background:var(--amber)}
+.http-5xx{background:var(--red)}
+.request-status-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px}
+.request-status-legend span{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:8px}
+.request-status-legend i{width:6px;height:6px;border-radius:50%}
+.request-extra-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:12px 0;border-top:1px solid var(--border)}
+.request-extra-stats>div{display:grid;gap:5px;min-width:0}
+.request-extra-stats small{font-size:8px;color:var(--muted)}
+.request-extra-stats b{font:600 11px 'JetBrains Mono',monospace;color:var(--text);white-space:nowrap}
+.request-top-routes{border-top:1px solid var(--border);padding-top:11px}
+.request-top-routes>div{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #26344580}
+.request-top-routes code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#a9c5d9;font-size:8px}
+.request-top-routes span{flex:none;color:var(--text);font:600 9px 'JetBrains Mono',monospace}
+.request-top-routes p{font-size:8px;color:var(--muted);line-height:1.5;margin:8px 0 0}
