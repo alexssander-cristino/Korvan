@@ -1,48 +1,76 @@
-# Prysm
+# Prysm — System Control
 
-Central privada de monitoramento e controle dos sistemas do proprietário.
+Central privada para monitorar disponibilidade, latência, falhas e eventos dos seus sistemas.
 
-## Stack inicial
-
-- React + TypeScript + Vite
-- Vercel Functions (API)
+## Stack
+- React 19 + TypeScript + Vite
+- Vercel Functions
 - Neon PostgreSQL
-- Telemetria autenticada por token de ingestão
+- Sessão administrativa assinada em cookie HttpOnly
+- Verificação HTTP sob demanda e ingestão autenticada de telemetria
 
-## Desenvolvimento
+## Desenvolvimento local
 
-```bash
-npm install
-npm run dev
-```
+1. Instale dependências: `npm install`
+2. Instale/tenha o Vercel CLI disponível: `npm install -g vercel`
+3. Copie `.env.example` para `.env.local` e preencha as variáveis.
+4. Execute `npm run dev` (usa `vercel dev`, pois o Vite sozinho não executa as funções de API).
 
-A interface inicial está disponível em `http://localhost:5173`.
+Para abrir somente a interface sem API, use `npm run dev:vite`.
 
 ## Variáveis de ambiente
 
-Copie `.env.example` para `.env.local`:
+- `DATABASE_URL`: conexão pooled do Neon para consultas HTTP/serverless.
+- `PRYSM_ADMIN_PASSWORD`: senha de acesso ao painel.
+- `PRYSM_SESSION_SECRET`: segredo aleatório longo para assinar sessões.
+- `PRYSM_INGEST_TOKEN`: token compartilhado com agentes externos de telemetria.
+- `PRYSM_CRON_SECRET`: token para autorizar verificações agendadas.
 
-- `DATABASE_URL`: conexão pooled do Neon para consultas da aplicação.
-- `PRYSM_INGEST_TOKEN`: segredo compartilhado pelos agentes de telemetria.
-- `CRON_SECRET`: reservado para execução autenticada de verificações agendadas.
+Gere segredos fortes. Exemplo no PowerShell:
 
-Não versione credenciais. Gere tokens longos e aleatórios e mantenha-os apenas nas variáveis de ambiente.
+```powershell
+[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+```
+
+Não use o mesmo valor para senha e segredos. Não versione `.env.local`.
 
 ## Banco de dados
 
-Aplique `db/migrations/0001_initial.sql` no banco Neon antes de habilitar a ingestão. A migration cria os sistemas iniciais e a tabela de eventos.
+No Neon, execute `db/migrations/0001_initial.sql` usando a conexão direta (sem `-pooler`) em um ambiente de migração. A aplicação usa a conexão pooled em `DATABASE_URL`.
 
-## API inicial
+A migration cria:
+- `monitored_systems`: sistemas monitorados e endpoints.
+- `telemetry_events`: checks, latência, status e metadados.
+- Índices para consultas por sistema, status e data.
+- Registros iniciais de Menuza, Madevix e Orvix (sem URL para os que ainda não foram configurados).
 
-### GET /api/health
+## Funcionalidades implementadas
 
-Verificação simples da API. Não depende do banco.
+- Login administrativo com cookie HttpOnly, SameSite=Lax e sessão HMAC com expiração de 12 horas.
+- Visão geral ligada ao banco: sistemas, disponibilidade 24h, falhas, latência média e P95.
+- Cadastro, edição, ativação/desativação e exclusão de sistemas.
+- Verificação HTTP manual de todos os sistemas ativos com URL configurada.
+- Histórico de eventos, filtros por status e lista de incidentes (eventos warning/error).
+- Desempenho por sistema e estado das integrações.
+- API de ingestão para agentes externos.
 
-### POST /api/ingest
+## Endpoints
 
-Recebe um evento de telemetria autenticado:
+- `GET /api/health`: saúde da API.
+- `GET /api/auth`: estado da sessão.
+- `POST /api/auth`: login com JSON `{ "password": "..." }`.
+- `DELETE /api/auth`: encerra a sessão.
+- `GET /api/overview`: resumo e métricas (admin).
+- `GET /api/systems` e `POST /api/systems`: listar/criar sistemas (admin).
+- `PATCH /api/system?id=<uuid>` e `DELETE /api/system?id=<uuid>`: editar/excluir (admin).
+- `GET /api/events?limit=50&status=error`: histórico (admin).
+- `POST /api/check`: executa checks HTTP (admin).
+- `POST /api/ingest`: recebe telemetria com `Authorization: Bearer <PRYSM_INGEST_TOKEN>`.
+
+Exemplo de ingestão:
 
 ```http
+POST /api/ingest
 Authorization: Bearer <PRYSM_INGEST_TOKEN>
 Content-Type: application/json
 ```
@@ -50,24 +78,20 @@ Content-Type: application/json
 ```json
 {
   "systemKey": "menuza",
-  "eventType": "http.check",
-  "status": "ok",
-  "message": "Endpoint respondeu",
-  "durationMs": 143,
-  "metadata": { "httpStatus": 200 }
+  "eventType": "application.error",
+  "status": "error",
+  "message": "Falha ao processar pedido",
+  "metadata": { "source": "api" }
 }
 ```
 
-A chave do sistema precisa existir em `monitored_systems`. A API valida os campos e usa parâmetros SQL vinculados.
+## Monitoramento automático
 
-## Próximas etapas
+O botão **Verificar agora** executa uma rodada imediata. Para recorrência, configure um scheduler externo para chamar `POST /api/check` com `Authorization: Bearer <PRYSM_CRON_SECRET>`. Ajuste a frequência conforme o plano/limites do provedor. A Vercel Functions é stateless; não mantenha um loop infinito dentro de uma função.
 
-1. Configurar o projeto Neon e aplicar a migration.
-2. Criar cadastro e autenticação administrativa.
-3. Implementar verificação periódica externa dos endpoints.
-4. Exibir métricas reais e histórico na interface.
-5. Adicionar incidentes, alertas e integrações de erros.
+## Limites atuais
 
-## Arquitetura de monitoramento
-
-A API da Vercel é stateless e não deve ser tratada como um processo worker permanente. As verificações recorrentes devem ser disparadas por um scheduler externo ou serviço de execução contínua. O painel e a API podem continuar na Vercel.
+- Alertas por e-mail/WhatsApp/Discord ainda não estão conectados.
+- Não há worker 3D ou agente de sistema operacional integrado; a aba Workers mostra o estado do coletor HTTP e o que falta integrar.
+- A disponibilidade é calculada com base nos checks registrados; não é retroativa.
+- A verificação HTTP mede a URL configurada e não substitui testes funcionais autenticados dentro de cada aplicação.
