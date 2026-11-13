@@ -200,3 +200,36 @@ footer{border-color:var(--border);color:#70849a}
 .system-performance-footer>small{color:var(--muted);font-size:8px}
 @media(max-width:1050px){.system-performance-grid{grid-template-columns:1fr}}
 @media(max-width:600px){.system-performance-card{padding:14px}.system-performance-metrics{gap:6px}.system-performance-metrics span{font-size:8px}.system-performance-metrics strong{font-size:14px}.system-chart-heading{align-items:flex-start;flex-direction:column}}
+
+
+/* Overview: activity and load charts per monitored system */
+.overview-traffic-section{margin:20px 0 25px}
+.overview-chart-title{margin-bottom:13px;align-items:flex-end}
+.overview-chart-title h2{font-size:15px;margin:0 0 5px}
+.overview-chart-title p{font-size:10px;color:var(--muted);margin:0}
+.chart-period{font:600 8px 'JetBrains Mono',monospace;letter-spacing:.08em;color:var(--cyan);padding:6px 8px;border:1px solid #24566a;border-radius:5px;background:#173342}
+.overview-system-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.overview-system-chart{min-width:0;padding:17px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.overview-system-chart>header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:13px;border-bottom:1px solid var(--border)}
+.overview-system-chart>header>div{display:flex;align-items:center;gap:9px;min-width:0}
+.overview-system-mark{width:32px;height:32px;display:grid;place-items:center;flex:none;border-radius:8px;background:#173342;color:var(--cyan);font-size:10px;font-weight:700}
+.overview-system-chart>header b{display:block;font-size:11px;color:var(--text)}
+.overview-system-chart>header small{display:block;margin-top:3px;color:var(--muted);font-size:8px}
+.overview-chart-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;padding:14px 0 9px}
+.overview-chart-stats>div{display:grid;gap:5px;min-width:0}
+.overview-chart-stats small{font-size:8px;color:var(--muted);white-space:nowrap}
+.overview-chart-stats b{font:600 14px 'JetBrains Mono',monospace;color:var(--text);white-space:nowrap}
+.overview-chart-stats .text-danger{color:var(--red)}
+.overview-bars{height:108px;display:grid;grid-template-columns:repeat(24,minmax(0,1fr));gap:3px;align-items:end;padding:7px 1px 0;border-bottom:1px solid var(--border)}
+.overview-bar-column{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+.overview-bar-column>i{width:100%;max-width:14px;min-height:2px;background:linear-gradient(180deg,var(--cyan),var(--blue));border-radius:3px 3px 0 0}
+.overview-bar-column>i.has-errors{background:linear-gradient(180deg,var(--red),var(--amber))}
+.overview-bar-column>small{height:10px;font-size:7px;color:var(--muted)}
+.overview-bar-value{height:9px;font:7px 'JetBrains Mono',monospace;color:var(--muted);line-height:9px}
+.overview-system-chart>footer{display:flex;gap:15px;flex-wrap:wrap;padding-top:10px;font-size:8px;color:var(--muted)}
+.overview-system-chart>footer span{display:flex;align-items:center;gap:5px}
+.legend-checks,.legend-errors{width:6px;height:6px;border-radius:50%;background:var(--cyan)}
+.legend-errors{background:var(--red)}
+.overview-chart-note{margin:10px 0 0;color:var(--muted);font-size:9px;line-height:1.5}
+@media(max-width:900px){.overview-system-grid{grid-template-columns:1fr}}
+@media(max-width:520px){.overview-system-chart{padding:13px}.overview-chart-stats{gap:5px}.overview-chart-stats small{font-size:7px}.overview-chart-stats b{font-size:12px}.overview-bars{gap:2px}.overview-system-chart>footer{gap:9px}}
