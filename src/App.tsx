@@ -21,6 +21,9 @@ type Overview = {
   uptime: { system_key: string; uptime_24h: number; avg_latency_ms: number | null; last_status: "ok" | "warning" | "error"; last_check: string }[];
   activity: Event[];
   hourly: { system_key: string; hour: string; checks: number; errors: number; avg_latency_ms: number | null; max_latency_ms: number | null }[];
+  requestHourly: { system_key: string; hour: string; requests: number; status_2xx: number; status_3xx: number; status_4xx: number; status_5xx: number; avg_latency_ms: number | null; p95_latency_ms: number | null; request_bytes: number; response_bytes: number }[];
+  requestSummary: { system_key: string; requests_24h: number; avg_latency_ms: number | null; p95_latency_ms: number | null; errors_24h: number; request_bytes: number; response_bytes: number }[];
+  topRoutes: { system_key: string; route: string; requests: number }[];
 };
 type Tab = "overview" | "systems" | "incidents" | "performance" | "workers" | "alerts" | "integrations" | "settings";
 
@@ -176,7 +179,7 @@ export default function App() {
           <Metric label="Disponibilidade média" value={overview?.uptime.length?(`${(overview.uptime.reduce((a,b)=>a+Number(b.uptime_24h),0)/overview.uptime.length).toFixed(2)}%`):"—"} note="Baseada nas verificações das últimas 24h" icon={Signal}/>
           <Metric label="Falhas nas últimas 24h" value={String(overview?.stats.errors_24h??0)} note={`${overview?.stats.checks_24h??0} verificações realizadas`} icon={AlertTriangle}/>
           <Metric label="Latência média" value={fmtMs(overview?.stats.avg_latency_ms)} note={`P95: ${fmtMs(overview?.stats.p95_latency_ms)}`} icon={Gauge}/>
-        </section><OverviewCharts systems={systems} hourly={overview?.hourly||[]}/><section className="section-heading"><div><h2>Seus sistemas</h2><p>Estado atual dos serviços monitorados.</p></div><button className="text-button" onClick={()=>setTab("systems")}>Gerenciar sistemas <ArrowUpRight size={15}/></button></section>
+        </section><OverviewCharts systems={systems} requestHourly={overview?.requestHourly||[]} requestSummary={overview?.requestSummary||[]} topRoutes={overview?.topRoutes||[]}/><section className="section-heading"><div><h2>Seus sistemas</h2><p>Estado atual dos serviços monitorados.</p></div><button className="text-button" onClick={()=>setTab("systems")}>Gerenciar sistemas <ArrowUpRight size={15}/></button></section>
         <SystemsTable systems={systems.slice(0,6)} uptimeByKey={uptimeByKey} onEdit={s=>setModal(s)}/>
         <div className="bottom-grid"><section className="panel"><div className="panel-heading"><div><h3>Atividade recente</h3><p>Últimos eventos registrados na central.</p></div><Clock3 size={17}/></div><EventList events={overview?.activity||[]}/></section><section className="panel"><div className="panel-heading"><div><h3>Saúde da infraestrutura</h3><p>Estado dos componentes principais.</p></div><Cpu size={17}/></div><div className="infra-list"><div><span><Database size={16}/> Banco de dados</span><b className="connected">Conectado</b></div><div><span><Zap size={16}/> Verificador HTTP</span><b className="connected">Disponível</b></div><div><span><ShieldCheck size={16}/> Sessão administrativa</span><b className="connected">Protegida</b></div></div></section></div></>}
         {tab==="systems"&&<><div className="list-toolbar"><div className="search-control"><Search size={16}/><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Buscar por nome, chave ou URL"/></div><span>{visibleSystems.length} de {systems.length} sistemas</span></div><SystemsTable systems={visibleSystems} uptimeByKey={uptimeByKey} onEdit={s=>setModal(s)}/></>}
@@ -194,40 +197,44 @@ export default function App() {
 }
 
 
-function OverviewCharts({systems,hourly}:{systems:System[];hourly:Overview["hourly"]}){
+function OverviewCharts({systems,requestHourly,requestSummary,topRoutes}:{systems:System[];requestHourly:Overview["requestHourly"];requestSummary:Overview["requestSummary"];topRoutes:Overview["topRoutes"]}){
   if(!systems.length)return null;
   const now=Date.now();
   const buckets=Array.from({length:24},(_,index)=>Math.floor((now-(23-index)*3600000)/3600000)*3600000);
+  const formatBytes=(value:number)=>value>=1024*1024*1024?(value/1024/1024/1024).toFixed(2)+" GB":value>=1024*1024?(value/1024/1024).toFixed(1)+" MB":value>=1024?(value/1024).toFixed(1)+" KB":value+" B";
   return <section className="overview-traffic-section">
-    <div className="section-heading overview-chart-title"><div><h2>Atividade por sistema</h2><p>Volume de verificações, falhas e latência nas últimas 24 horas.</p></div><span className="chart-period">ÚLTIMAS 24H</span></div>
+    <div className="section-heading overview-chart-title"><div><h2>Tráfego real por sistema</h2><p>Requisições recebidas pelas aplicações nas últimas 24 horas.</p></div><span className="chart-period">ÚLTIMAS 24H</span></div>
     <div className="overview-system-grid">
       {systems.map(system=>{
-        const rows=hourly.filter(row=>row.system_key===system.system_key);
+        const rows=requestHourly.filter(row=>row.system_key===system.system_key);
+        const summary=requestSummary.find(row=>row.system_key===system.system_key);
+        const routes=topRoutes.filter(row=>row.system_key===system.system_key).slice(0,5);
         const indexed=new Map(rows.map(row=>[Math.floor(new Date(row.hour).getTime()/3600000)*3600000,row]));
         const values=buckets.map(bucket=>indexed.get(bucket));
-        const counts=values.map(row=>Number(row?.checks||0));
-        const errors=values.map(row=>Number(row?.errors||0));
+        const counts=values.map(row=>Number(row?.requests||0));
         const peak=Math.max(0,...counts);
-        const total=counts.reduce((sum,value)=>sum+value,0);
-        const errorTotal=errors.reduce((sum,value)=>sum+value,0);
-        const maxLatency=Math.max(0,...values.map(row=>Number(row?.max_latency_ms||0)));
+        const total=Number(summary?.requests_24h||0);
         const maxBar=Math.max(1,...counts);
-        return <article className="overview-system-chart" key={system.id}>
-          <header><div><span className="overview-system-mark">{system.name.slice(0,2).toUpperCase()}</span><div><b>{system.name}</b><small>{system.system_key}</small></div></div><Status status={!system.enabled?"warning":!total?"pending":errorTotal?"error":"ok"}/></header>
-          <div className="overview-chart-stats"><div><small>Verificações</small><b>{total}</b></div><div><small>Pico por hora</small><b>{peak}</b></div><div><small>Falhas</small><b className={errorTotal?"text-danger":""}>{errorTotal}</b></div><div><small>Maior latência</small><b>{maxLatency?fmtMs(maxLatency):"—"}</b></div></div>
-          <div className="overview-bars" role="img" aria-label={"Verificações por hora de "+system.name+" nas últimas 24 horas"}>
-            {counts.map((count,index)=><div className="overview-bar-column" key={buckets[index]} title={new Date(buckets[index]).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+": "+count+" verificações · "+errors[index]+" falhas"}>
-              <span className="overview-bar-value">{count||""}</span><i style={{height:count?Math.max(5,count/maxBar*64)+"px":"2px"}} className={errors[index]?"has-errors":""}/><small>{index%4===0?new Date(buckets[index]).toLocaleTimeString("pt-BR",{hour:"2-digit"}):""}</small>
-            </div>)}
+        const s2=Number(rows.reduce((sum,row)=>sum+Number(row.status_2xx||0),0));
+        const s3=Number(rows.reduce((sum,row)=>sum+Number(row.status_3xx||0),0));
+        const s4=Number(rows.reduce((sum,row)=>sum+Number(row.status_4xx||0),0));
+        const s5=Number(rows.reduce((sum,row)=>sum+Number(row.status_5xx||0),0));
+        const statusTotal=Math.max(1,s2+s3+s4+s5);
+        return <article className="overview-system-chart request-system-chart" key={system.id}>
+          <header><div><span className="overview-system-mark">{system.name.slice(0,2).toUpperCase()}</span><div><b>{system.name}</b><small>{system.system_key}</small></div></div><Status status={!system.enabled?"warning":!total?"pending":s5?"error":s4?"warning":"ok"}/></header>
+          <div className="overview-chart-stats"><div><small>Requisições (24h)</small><b>{total.toLocaleString("pt-BR")}</b></div><div><small>Pico por hora</small><b>{peak.toLocaleString("pt-BR")}</b></div><div><small>Latência média</small><b>{fmtMs(summary?.avg_latency_ms)}</b></div><div><small>Latência P95</small><b>{fmtMs(summary?.p95_latency_ms)}</b></div></div>
+          <div className="overview-bars request-bars" role="img" aria-label={"Requisições por hora de "+system.name+" nas últimas 24 horas"}>
+            {counts.map((count,index)=><div className="overview-bar-column" key={buckets[index]} title={new Date(buckets[index]).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+": "+count+" requisições"}><span className="overview-bar-value">{count?count.toLocaleString("pt-BR"):""}</span><i style={{height:count?Math.max(5,count/maxBar*64)+"px":"2px" }}/><small>{index%4===0?new Date(buckets[index]).toLocaleTimeString("pt-BR",{hour:"2-digit"}):""}</small></div>)}
           </div>
-          <footer><span><i className="legend-checks"/> Verificações por hora</span><span><i className="legend-errors"/> Horas com falhas</span></footer>
+          <div className="request-status-block"><div className="request-status-heading"><b>Respostas HTTP</b><span>{(s4+s5).toLocaleString("pt-BR")} erros 4xx/5xx</span></div><div className="request-status-stack"><i className="http-2xx" style={{width:(s2/statusTotal*100)+"%"}}/><i className="http-3xx" style={{width:(s3/statusTotal*100)+"%"}}/><i className="http-4xx" style={{width:(s4/statusTotal*100)+"%"}}/><i className="http-5xx" style={{width:(s5/statusTotal*100)+"%"}}/></div><div className="request-status-legend"><span><i className="http-2xx"/>2xx {s2}</span><span><i className="http-3xx"/>3xx {s3}</span><span><i className="http-4xx"/>4xx {s4}</span><span><i className="http-5xx"/>5xx {s5}</span></div></div>
+          <div className="request-extra-stats"><div><small>Dados recebidos</small><b>{formatBytes(Number(summary?.request_bytes||0))}</b></div><div><small>Dados enviados</small><b>{formatBytes(Number(summary?.response_bytes||0))}</b></div><div><small>Requisições com erro</small><b>{Number(summary?.errors_24h||0).toLocaleString("pt-BR")}</b></div></div>
+          <div className="request-top-routes"><b>Rotas mais acessadas</b>{routes.length?routes.map(route=><div key={route.route}><code>{route.route}</code><span>{route.requests.toLocaleString("pt-BR")}</span></div>):<p>Sem dados de requisições. Integre o agente do Prysm ao backend deste sistema.</p>}</div>
         </article>;
       })}
     </div>
-    <p className="overview-chart-note">Este gráfico representa as verificações HTTP registradas pelo Prysm, não o total de requisições feitas pelos usuários aos seus sistemas.</p>
+    <p className="overview-chart-note">Os números vêm de eventos <code>http.request</code> enviados pelo backend de cada aplicação. Sem instrumentação instalada, o painel não consegue enxergar o tráfego real.</p>
   </section>;
 }
-
 function PerformanceCharts({events,systems,uptimeByKey}:{events:Event[];systems:System[];uptimeByKey:Map<string,{uptime_24h:number;avg_latency_ms:number|null;last_status:"ok"|"warning"|"error";last_check:string}>}){
   if(!systems.length)return <section className="systems-card"><div className="chart-empty">Cadastre um sistema para acompanhar seu desempenho.</div></section>;
   return <section className="system-performance-grid">
