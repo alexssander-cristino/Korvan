@@ -22,7 +22,7 @@ function Metric({ label, value, note, icon: Icon }: { label: string; value: stri
 export default function App() {
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><div className="brand-mark"><Signal size={20} /></div><div><b>KORVAN</b><span>SYSTEM CONTROL</span></div></div>
+      <div className="brand"><div className="brand-mark"><Signal size={20} /></div><div><b>PRYSM</b><span>SYSTEM CONTROL</span></div></div>
       <div className="workspace"><div className="workspace-avatar">A</div><div><b>Workspace pessoal</b><span>Ambiente privado</span></div><ChevronDown size={15} /></div>
       <div className="nav-label">MONITORAMENTO</div>
       <nav>
@@ -39,7 +39,7 @@ export default function App() {
         <a className="nav-item"><Settings2 size={18} /> Configurações</a>
       </nav>
       <div className="sidebar-bottom">
-        <div className="help-card"><div><LifeBuoy size={17} /><b>Central de ajuda</b></div><p>Documentação e suporte do Korvan.</p><a>Consultar documentação <ArrowUpRight size={13}/></a></div>
+        <div className="help-card"><div><LifeBuoy size={17} /><b>Central de ajuda</b></div><p>Documentação e suporte do Prysm.</p><a>Consultar documentação <ArrowUpRight size={13}/></a></div>
         <div className="profile"><div className="profile-avatar">AC</div><div><b>Administrador</b><span>Acesso proprietário</span></div><MoreHorizontal size={18}/></div>
       </div>
     </aside>
@@ -70,7 +70,7 @@ export default function App() {
           <section className="panel"><div className="panel-heading"><div><h3>Atividade recente</h3><p>Últimos eventos registrados na central.</p></div><Clock3 size={17}/></div><div className="empty-state"><div className="empty-icon"><Activity size={20}/></div><b>Nenhuma atividade registrada</b><span>Os eventos dos seus sistemas aparecerão aqui.</span></div></section>
           <section className="panel"><div className="panel-heading"><div><h3>Saúde da infraestrutura</h3><p>Visão consolidada dos componentes.</p></div><Cpu size={17}/></div><div className="infra-list"><div><span><Database size={16}/> Banco de dados</span><b className="waiting">Não conectado</b></div><div><span><Zap size={16}/> Coletor de métricas</span><b className="waiting">Não configurado</b></div><div><span><ShieldCheck size={16}/> Canal de ingestão</span><b className="waiting">Não configurado</b></div></div></section>
         </div>
-        <footer>Korvan <span>·</span> System Control <span>·</span> Versão 0.1.0 <span className="footer-right">Central privada de monitoramento</span></footer>
+        <footer>Prysm <span>·</span> System Control <span>·</span> Versão 0.1.0 <span className="footer-right">Central privada de monitoramento</span></footer>
       </div>
     </main>
   </div>;
