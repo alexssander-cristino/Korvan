@@ -1,0 +1,22 @@
+name: Prysm scheduled monitoring
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-systems:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Prysm HTTP checks
+        env:
+          PRYSM_DEPLOYMENT_URL: ${{ secrets.PRYSM_DEPLOYMENT_URL }}
+          PRYSM_CRON_SECRET: ${{ secrets.PRYSM_CRON_SECRET }}
+        run: |
+          test -n "$PRYSM_DEPLOYMENT_URL" || (echo "Missing PRYSM_DEPLOYMENT_URL secret" && exit 1)
+          test -n "$PRYSM_CRON_SECRET" || (echo "Missing PRYSM_CRON_SECRET secret" && exit 1)
+          curl --fail-with-body --silent --show-error \
+            --max-time 60 \
+            -H "Authorization: Bearer $PRYSM_CRON_SECRET" \
+            "$PRYSM_DEPLOYMENT_URL/api/check"
