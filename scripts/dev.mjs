@@ -89,7 +89,7 @@ const server = createHttpServer(async (req, res) => {
 
 vite = await createViteServer({
   configFile: "vite.config.ts",
-  appType: "custom",
+  appType: "spa",
   server: { middlewareMode: true, hmr: { server } },
 });
 
