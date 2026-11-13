@@ -31,3 +31,5 @@ VALUES
   ('madevix', 'Madevix', 'Sistema de gestão empresarial', NULL),
   ('orvix', 'Orvix', 'Sistema de agendamentos', NULL)
 ON CONFLICT (system_key) DO NOTHING;
+CREATE INDEX IF NOT EXISTS telemetry_events_type_created_idx
+  ON telemetry_events (event_type, created_at DESC);
