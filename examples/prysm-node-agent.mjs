@@ -47,5 +47,21 @@ export function createPrysmReporter({ endpoint, systemKey, token }) {
     performance(eventType, durationMs, metadata = {}) {
       return send({ eventType, status: "ok", durationMs, metadata });
     },
+    request({ method = "GET", route = "/", statusCode = 200, durationMs = 0, requestBytes = 0, responseBytes = 0 }) {
+      const code = Number(statusCode);
+      const status = code >= 500 ? "error" : code >= 400 ? "warning" : "ok";
+      return send({
+        eventType: "http.request",
+        status,
+        durationMs: Math.max(0, Math.round(durationMs)),
+        metadata: {
+          method: String(method).toUpperCase().slice(0, 10),
+          route: String(route).split("?")[0].slice(0, 240),
+          httpStatus: code,
+          requestBytes: Math.max(0, Number(requestBytes) || 0),
+          responseBytes: Math.max(0, Number(responseBytes) || 0),
+        },
+      });
+    },
   };
 }
