@@ -258,3 +258,8 @@ footer{border-color:var(--border);color:#70849a}
 .request-top-routes code{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#a9c5d9;font-size:8px}
 .request-top-routes span{flex:none;color:var(--text);font:600 9px 'JetBrains Mono',monospace}
 .request-top-routes p{font-size:8px;color:var(--muted);line-height:1.5;margin:8px 0 0}
+
+
+/* Prysm sidebar logo */
+.brand{display:flex;align-items:center;justify-content:center;padding:0 2px 24px;min-height:104px}
+.brand-logo{display:block;width:100%;max-width:218px;height:auto;object-fit:contain;}
