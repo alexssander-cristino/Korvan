@@ -128,6 +128,11 @@ export default function App() {
 
   useEffect(()=>{api<{authenticated:boolean}>("/api/auth").then(r=>setAuthenticated(r.authenticated)).catch(()=>setAuthenticated(false));},[]);
   useEffect(()=>{if(authenticated)loadData();},[authenticated,loadData]);
+  useEffect(()=>{
+    if(!authenticated)return;
+    const interval=window.setInterval(()=>loadData(),30000);
+    return ()=>window.clearInterval(interval);
+  },[authenticated,loadData]);
 
   async function login(password:string){await api("/api/auth",{method:"POST",body:JSON.stringify({password})});setAuthenticated(true);}
   async function logout(){await api("/api/auth",{method:"DELETE"});setAuthenticated(false);setOverview(null);setEvents([]);}
