@@ -5,7 +5,8 @@ function sameOrigin(req) {
   const origin = req.headers.origin;
   if (!origin) return true;
   const host = req.headers.host;
-  return Boolean(host && new URL(origin).host === host);
+  try { return Boolean(host && new URL(origin).host === host); }
+  catch { return false; }
 }
 
 export default async function handler(req, res) {
