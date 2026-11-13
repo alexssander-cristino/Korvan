@@ -46,7 +46,7 @@ A migration cria:
 ## Funcionalidades implementadas
 
 - Login administrativo com cookie HttpOnly, SameSite=Lax e sessão HMAC com expiração de 12 horas.
-- Visão geral ligada ao banco: sistemas, disponibilidade 24h, falhas, latência média e P95.
+- Visão geral ligada ao banco: sistemas, disponibilidade 24h, falhas, latência média e P95. Os gráficos de tráfego usam eventos reais `http.request` enviados pelos backends instrumentados.
 - Cadastro, edição, ativação/desativação e exclusão de sistemas.
 - Verificação HTTP manual de todos os sistemas ativos com URL configurada.
 - Histórico de eventos, filtros por status e lista de incidentes (eventos warning/error).
@@ -111,7 +111,23 @@ try {
 }
 ```
 
-O agente envia erros e métricas sem interromper a aplicação monitorada. Nunca coloque o token em JavaScript executado no navegador.
+Para registrar o tráfego HTTP real, chame `prysm.request()` ao concluir cada requisição no backend (nunca no frontend). Exemplo para um handler Node.js/Express:
+
+```js
+const startedAt = Date.now();
+res.on("finish", () => {
+  void prysm.request({
+    method: req.method,
+    route: req.route?.path ? req.baseUrl + req.route.path : req.path,
+    statusCode: res.statusCode,
+    durationMs: Date.now() - startedAt,
+    requestBytes: Number(req.headers["content-length"] || 0),
+    responseBytes: Number(res.getHeader("content-length") || 0),
+  });
+});
+```
+
+Use rotas padronizadas (por exemplo `/api/orders/:id`) e não envie query strings, tokens, IPs, e-mails ou dados pessoais. A coleta cria um evento por requisição; monitore o volume e o custo de armazenamento em aplicações de alto tráfego. Nunca coloque o token em JavaScript executado no navegador.
 
 ## Monitoramento automático
 
