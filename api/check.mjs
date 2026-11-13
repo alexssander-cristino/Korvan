@@ -1,13 +1,34 @@
 import { getDb } from "../lib/server/db.mjs";
 import { cronAuthorized, requireAdmin } from "../lib/server/auth.mjs";
 
-function safeTarget(raw) {
+import { isIP } from "node:net";
+import { lookup } from "node:dns/promises";
+
+function isPrivateAddress(address) {
+  if (isIP(address) === 4) {
+    const [a,b] = address.split(".").map(Number);
+    return a === 0 || a === 10 || a === 127 || a >= 224 ||
+      (a === 100 && b >= 64 && b <= 127) ||
+      (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) || (a === 198 && (b === 18 || b === 19));
+  }
+  const normalized = address.toLowerCase();
+  return normalized === "::" || normalized === "::1" ||
+    normalized.startsWith("fc") || normalized.startsWith("fd") ||
+    normalized.startsWith("fe8") || normalized.startsWith("fe9") ||
+    normalized.startsWith("fea") || normalized.startsWith("feb") ||
+    normalized.startsWith("ff") || normalized.startsWith("::ffff:127.") ||
+    normalized.startsWith("::ffff:10.") || normalized.startsWith("::ffff:192.168.");
+}
+
+async function safeTarget(raw) {
   try {
     const url = new URL(raw);
     if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return false;
-    const host = url.hostname.toLowerCase();
+    const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, "");
     if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local") || host.endsWith(".internal")) return false;
-    if (/^(10\.|127\.|169\.254\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host)) return false;
+    const records = isIP(host) ? [{ address: host }] : await lookup(host, { all: true });
+    if (!records.length || records.some(record => isPrivateAddress(record.address))) return false;
     return url.toString();
   } catch { return false; }
 }
@@ -24,7 +45,7 @@ export default async function handler(req, res) {
     const sql = getDb();
     const systems = await sql`SELECT system_key, name, base_url FROM monitored_systems WHERE enabled = TRUE AND base_url IS NOT NULL ORDER BY name LIMIT 100`;
     const results = await Promise.all(systems.map(async (system) => {
-      const target = safeTarget(system.base_url);
+      const target = await safeTarget(system.base_url);
       const started = Date.now();
       let status = "error";
       let message = target ? "Falha ao conectar" : "URL bloqueada por segurança";
