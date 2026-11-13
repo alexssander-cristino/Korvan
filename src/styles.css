@@ -127,3 +127,40 @@ footer{border-color:var(--border);color:#70849a}
 @media(max-width:720px){
   .sidebar{display:none}
 }
+
+/* Performance charts */
+.performance-charts{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,1fr);gap:14px;margin:15px 0}
+.chart-panel{min-width:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px}
+.latency-chart{grid-row:span 2}
+.chart-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}
+.chart-heading h3{font-size:12px;margin:0 0 5px;color:var(--text)}
+.chart-heading p{font-size:9px;color:var(--muted);margin:0}
+.chart-legend{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:9px;white-space:nowrap}
+.chart-legend i{width:7px;height:7px;border-radius:50%;background:var(--cyan)}
+.line-chart-wrap{width:100%;min-width:0}
+.line-chart-wrap svg{display:block;width:100%;height:205px;overflow:visible}
+.chart-gridline{stroke:var(--border);stroke-width:1;stroke-dasharray:3 5}
+.latency-line{fill:none;stroke:var(--cyan);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.latency-point{fill:var(--surface);stroke:var(--cyan);stroke-width:2}
+.chart-axis{display:flex;justify-content:space-between;color:var(--muted);font-size:8px;margin-top:4px}
+.chart-footnote{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--border);padding-top:12px;margin-top:13px;color:var(--muted);font-size:9px}
+.chart-footnote b{color:var(--text);font-weight:600}
+.uptime-bars{display:grid;gap:14px}
+.uptime-bar-row>div:first-child{display:flex;justify-content:space-between;gap:10px;margin-bottom:7px}
+.uptime-bar-row b{font-size:10px;color:var(--text);font-weight:500}
+.uptime-bar-row strong{font:600 10px 'JetBrains Mono',monospace;color:var(--green)}
+.uptime-track{height:7px;background:#263445;border-radius:10px;overflow:hidden}
+.uptime-track i{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:10px}
+.uptime-bar-row small{display:block;margin-top:5px;color:var(--muted);font-size:8px}
+.status-stack{display:flex;height:11px;overflow:hidden;border-radius:10px;background:#263445;gap:2px}
+.status-stack i{display:block;min-width:2px;border-radius:8px}
+.status-breakdown{display:grid;gap:10px;margin-top:15px}
+.status-breakdown>div,.status-breakdown>div>span,.status-breakdown>div>b{display:flex;align-items:center}
+.status-breakdown>div{justify-content:space-between;font-size:9px;color:var(--muted)}
+.status-breakdown>div>span{gap:7px}
+.status-breakdown>div>span i{width:7px;height:7px;border-radius:50%}
+.status-breakdown>div>b{gap:8px;color:var(--text);font-weight:600}
+.status-breakdown small{color:var(--muted);font-size:8px;font-weight:400}
+.chart-empty{display:grid;place-items:center;min-height:125px;padding:18px;text-align:center;color:var(--muted);font-size:10px;line-height:1.6}
+@media(max-width:980px){.performance-charts{grid-template-columns:1fr}.latency-chart{grid-row:auto}}
+@media(max-width:720px){.performance-charts{gap:10px}.chart-panel{padding:14px}.chart-footnote{flex-direction:column;gap:5px}.line-chart-wrap svg{height:175px}}
