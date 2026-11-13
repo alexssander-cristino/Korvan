@@ -213,7 +213,7 @@ function OverviewCharts({systems,hourly}:{systems:System[];hourly:Overview["hour
         const maxLatency=Math.max(0,...values.map(row=>Number(row?.max_latency_ms||0)));
         const maxBar=Math.max(1,...counts);
         return <article className="overview-system-chart" key={system.id}>
-          <header><div><span className="overview-system-mark">{system.name.slice(0,2).toUpperCase()}</span><div><b>{system.name}</b><small>{system.system_key}</small></div></div><Status status={!system.enabled?"warning":errorTotal?"error":"ok"}/></header>
+          <header><div><span className="overview-system-mark">{system.name.slice(0,2).toUpperCase()}</span><div><b>{system.name}</b><small>{system.system_key}</small></div></div><Status status={!system.enabled?"warning":!total?"pending":errorTotal?"error":"ok"}/></header>
           <div className="overview-chart-stats"><div><small>Verificações</small><b>{total}</b></div><div><small>Pico por hora</small><b>{peak}</b></div><div><small>Falhas</small><b className={errorTotal?"text-danger":""}>{errorTotal}</b></div><div><small>Maior latência</small><b>{maxLatency?fmtMs(maxLatency):"—"}</b></div></div>
           <div className="overview-bars" role="img" aria-label={"Verificações por hora de "+system.name+" nas últimas 24 horas"}>
             {counts.map((count,index)=><div className="overview-bar-column" key={buckets[index]} title={new Date(buckets[index]).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"})+": "+count+" verificações · "+errors[index]+" falhas"}>
