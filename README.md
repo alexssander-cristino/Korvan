@@ -1,4 +1,4 @@
-# Korvan
+# Prysm
 
 Central privada de monitoramento e controle dos sistemas do proprietário.
 
@@ -23,7 +23,7 @@ A interface inicial está disponível em `http://localhost:5173`.
 Copie `.env.example` para `.env.local`:
 
 - `DATABASE_URL`: conexão pooled do Neon para consultas da aplicação.
-- `KORVAN_INGEST_TOKEN`: segredo compartilhado pelos agentes de telemetria.
+- `PRYSM_INGEST_TOKEN`: segredo compartilhado pelos agentes de telemetria.
 - `CRON_SECRET`: reservado para execução autenticada de verificações agendadas.
 
 Não versione credenciais. Gere tokens longos e aleatórios e mantenha-os apenas nas variáveis de ambiente.
@@ -43,7 +43,7 @@ Verificação simples da API. Não depende do banco.
 Recebe um evento de telemetria autenticado:
 
 ```http
-Authorization: Bearer <KORVAN_INGEST_TOKEN>
+Authorization: Bearer <PRYSM_INGEST_TOKEN>
 Content-Type: application/json
 ```
 
