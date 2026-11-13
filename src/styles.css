@@ -261,5 +261,27 @@ footer{border-color:var(--border);color:#70849a}
 
 
 /* Prysm sidebar logo */
-.brand{display:flex;align-items:center;justify-content:center;padding:0 2px 24px;min-height:104px}
-.brand-logo{display:block;width:100%;max-width:218px;height:auto;object-fit:contain;}
+.brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 0 22px;
+  min-height:0;
+}
+.brand-logo{
+  display:block;
+  width:min(100%, 188px);
+  aspect-ratio:2 / 1;
+  height:auto;
+  object-fit:cover;
+  border-radius:16px;
+  border:1px solid rgba(53,198,232,.24);
+  background:#05090e;
+  box-shadow:0 8px 24px rgba(0,0,0,.28), 0 0 18px rgba(53,198,232,.07);
+  transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+.brand-logo:hover{
+  border-color:rgba(53,198,232,.48);
+  box-shadow:0 10px 28px rgba(0,0,0,.34), 0 0 22px rgba(53,198,232,.12);
+  transform:translateY(-1px);
+}
