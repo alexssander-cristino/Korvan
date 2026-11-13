@@ -5,10 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/dev.mjs",
-    "build": "tsc -b && vite build",
+    "build": "npm run check:api && tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc -b --pretty",
-    "dev:vite": "vite"
+    "dev:vite": "vite",
+    "check:api": "node --check api/auth.mjs && node --check api/health.mjs && node --check api/overview.mjs && node --check api/systems.mjs && node --check api/system.mjs && node --check api/events.mjs && node --check api/check.mjs && node --check api/ingest.mjs && node --check scripts/dev.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.2",
