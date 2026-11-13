@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "method_not_allowed" });
   }
 
-  const expected = process.env.KORVAN_INGEST_TOKEN;
+  const expected = process.env.PRYSM_INGEST_TOKEN;
   const provided = req.headers.authorization?.replace(/^Bearer\s+/i, "");
   if (!expected || !provided || provided !== expected) return unauthorized(res);
 
@@ -48,7 +48,7 @@ export default async function handler(req, res) {
     `;
     return res.status(201).json({ accepted: true, event: rows[0] });
   } catch (error) {
-    console.error("Korvan ingest failed", error);
+    console.error("Prysm ingest failed", error);
     return res.status(500).json({ error: "ingest_failed" });
   }
 }
