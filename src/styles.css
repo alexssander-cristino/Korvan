@@ -164,3 +164,39 @@ footer{border-color:var(--border);color:#70849a}
 .chart-empty{display:grid;place-items:center;min-height:125px;padding:18px;text-align:center;color:var(--muted);font-size:10px;line-height:1.6}
 @media(max-width:980px){.performance-charts{grid-template-columns:1fr}.latency-chart{grid-row:auto}}
 @media(max-width:720px){.performance-charts{gap:10px}.chart-panel{padding:14px}.chart-footnote{flex-direction:column;gap:5px}.line-chart-wrap svg{height:175px}}
+
+/* Individual performance monitoring by system */
+.system-performance-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px;margin:15px 0}
+.system-performance-card{min-width:0;padding:18px;background:var(--surface);border:1px solid var(--border);border-radius:10px}
+.system-performance-header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:15px;border-bottom:1px solid var(--border)}
+.system-performance-identity{display:flex;align-items:center;gap:10px;min-width:0}
+.system-performance-avatar{width:35px;height:35px;flex:none;display:grid;place-items:center;border-radius:9px;background:rgba(53,198,232,.12);color:var(--cyan);font-size:11px;font-weight:700}
+.system-performance-identity h3{margin:0 0 3px;color:var(--text);font-size:13px}
+.system-performance-identity span{color:var(--muted);font-size:9px}
+.system-performance-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:15px 0;border-bottom:1px solid var(--border)}
+.system-performance-metrics>div{display:grid;gap:6px;min-width:0}
+.system-performance-metrics span{color:var(--muted);font-size:9px;line-height:1.4}
+.system-performance-metrics strong{color:var(--text);font-size:16px;font-weight:650;white-space:nowrap}
+.system-performance-metrics .performance-uptime{color:var(--green)}
+.system-chart-heading{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;margin:15px 0 8px}
+.system-chart-heading>div{display:grid;gap:4px}
+.system-chart-heading b{color:var(--text);font-size:10px}
+.system-chart-heading span,.system-chart-heading small{color:var(--muted);font-size:8px}
+.system-chart-heading small{white-space:nowrap}
+.system-line-chart svg{display:block;width:100%;height:155px;overflow:visible}
+.system-chart-area{fill:rgba(53,198,232,.10);stroke:none}
+.system-chart-empty{display:grid;place-items:center;min-height:155px;padding:16px;text-align:center;color:var(--muted);font-size:10px}
+.system-performance-footer{border-top:1px solid var(--border);padding-top:12px;margin-top:10px}
+.system-status-distribution{display:flex;justify-content:space-between;gap:8px}
+.system-status-distribution>div{display:flex;gap:6px;align-items:center;font-size:9px}
+.system-status-distribution span{color:var(--muted)}
+.system-status-distribution b{color:var(--text)}
+.system-status-stack{height:6px;display:flex;gap:2px;overflow:hidden;border-radius:8px;background:#263445;margin:10px 0 8px}
+.system-status-stack i{min-width:2px;border-radius:8px}
+.system-status-stack .ok-segment{background:var(--green)}
+.system-status-stack .warning-segment{background:var(--amber)}
+.system-status-stack .error-segment{background:var(--red)}
+.system-status-stack>span{font-size:8px;color:var(--muted)}
+.system-performance-footer>small{color:var(--muted);font-size:8px}
+@media(max-width:1050px){.system-performance-grid{grid-template-columns:1fr}}
+@media(max-width:600px){.system-performance-card{padding:14px}.system-performance-metrics{gap:6px}.system-performance-metrics span{font-size:8px}.system-performance-metrics strong{font-size:14px}.system-chart-heading{align-items:flex-start;flex-direction:column}}
