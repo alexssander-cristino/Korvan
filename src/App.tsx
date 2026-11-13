@@ -164,7 +164,7 @@ export default function App() {
 
   return <div className="app-shell">
     <aside className="sidebar">
-      <div className="brand"><img className="brand-logo" src={`data:image/jpeg;base64,${logo}`} alt="Prysm — Monitoramento Inteligente" /></div>
+      <div className="brand"><img className="brand-logo" src={`data:image/webp;base64,${b64}`} alt="Prysm — Monitoramento Inteligente" /></div>
       <div className="workspace"><div className="workspace-avatar">A</div><div><b>Workspace pessoal</b><span>Ambiente privado</span></div><ChevronDown size={15}/></div>
       {(["MONITORAMENTO","GERENCIAMENTO"] as const).map(group=><div key={group}><div className={group==="GERENCIAMENTO"?"nav-label second-label":"nav-label"}>{group}</div><nav>{tabs.filter(item=>item.group===group).map(item=><button key={item.id} className={`nav-item ${tab===item.id?"active":""}`} onClick={()=>setTab(item.id)}><item.icon size={18}/>{item.label}{item.id==="systems"&&<span className="nav-count">{String(systems.length).padStart(2,"0")}</span>}{item.id==="incidents"&&<span className="nav-count">{overview?.stats.errors_24h||0}</span>}</button>)}</nav></div>)}
       <div className="sidebar-bottom"><div className="help-card"><div><LifeBuoy size={17}/><b>Central de operações</b></div><p>Monitoramento privado dos seus sistemas.</p><a onClick={()=>setTab("settings")}>Configurar central <ArrowUpRight size={13}/></a></div><div className="profile"><div className="profile-avatar">AC</div><div><b>Administrador</b><span>Acesso proprietário</span></div><button className="icon-button" onClick={logout} aria-label="Sair"><LogOut size={17}/></button></div></div>
