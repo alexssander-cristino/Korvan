@@ -260,28 +260,36 @@ footer{border-color:var(--border);color:#70849a}
 .request-top-routes p{font-size:8px;color:var(--muted);line-height:1.5;margin:8px 0 0}
 
 
-/* Prysm sidebar logo */
+/* Sidebar brand: compact, contained and separated from workspace */
+.sidebar{overflow-y:auto;overflow-x:hidden}
 .brand{
+  flex:0 0 auto;
+  width:100%;
+  min-height:0;
+  height:88px;
+  margin:0 0 16px;
+  padding:0;
   display:flex;
   align-items:center;
   justify-content:center;
-  padding:2px 0 22px;
-  min-height:0;
 }
 .brand-logo{
   display:block;
-  width:min(100%, 188px);
-  aspect-ratio:2 / 1;
-  height:auto;
-  object-fit:cover;
-  border-radius:16px;
-  border:1px solid rgba(53,198,232,.24);
+  flex:0 0 auto;
+  width:176px !important;
+  max-width:calc(100% - 20px);
+  height:76px !important;
+  aspect-ratio:auto;
+  object-fit:contain;
+  object-position:center;
+  overflow:hidden;
+  border:1px solid rgba(53,198,232,.28);
+  border-radius:13px;
   background:#05090e;
-  box-shadow:0 8px 24px rgba(0,0,0,.28), 0 0 18px rgba(53,198,232,.07);
-  transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  box-shadow:0 5px 18px rgba(0,0,0,.28),0 0 14px rgba(53,198,232,.06);
+  transition:border-color .2s ease,box-shadow .2s ease;
 }
 .brand-logo:hover{
-  border-color:rgba(53,198,232,.48);
-  box-shadow:0 10px 28px rgba(0,0,0,.34), 0 0 22px rgba(53,198,232,.12);
-  transform:translateY(-1px);
+  border-color:rgba(53,198,232,.5);
+  box-shadow:0 7px 22px rgba(0,0,0,.32),0 0 18px rgba(53,198,232,.1);
 }
