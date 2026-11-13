@@ -84,9 +84,38 @@ Content-Type: application/json
 }
 ```
 
+## Integração com os backends dos sistemas
+
+Use `examples/prysm-node-agent.mjs` em cada backend Node.js. Configure no ambiente desse backend:
+
+- `PRYSM_INGEST_URL`: URL pública do Prysm.
+- `PRYSM_INGEST_TOKEN`: o mesmo segredo configurado no Prysm.
+- `PRYSM_SYSTEM_KEY`: chave cadastrada do sistema (por exemplo, `menuza`).
+
+Exemplo:
+
+```js
+import { createPrysmReporter } from "./prysm-node-agent.mjs";
+
+const prysm = createPrysmReporter({
+  endpoint: process.env.PRYSM_INGEST_URL,
+  systemKey: process.env.PRYSM_SYSTEM_KEY,
+  token: process.env.PRYSM_INGEST_TOKEN,
+});
+
+try {
+  // Execute aqui a operação real da aplicação.
+} catch (error) {
+  await prysm.error(error, { module: "orders" });
+  throw error;
+}
+```
+
+O agente envia erros e métricas sem interromper a aplicação monitorada. Nunca coloque o token em JavaScript executado no navegador.
+
 ## Monitoramento automático
 
-O botão **Verificar agora** executa uma rodada imediata. Para recorrência, configure um scheduler externo para chamar `POST /api/check` com `Authorization: Bearer <PRYSM_CRON_SECRET>`. Ajuste a frequência conforme o plano/limites do provedor. A Vercel Functions é stateless; não mantenha um loop infinito dentro de uma função.
+O botão **Verificar agora** executa uma rodada imediata. Para recorrência, configure um scheduler externo para chamar `POST /api/check` com `Authorization: Bearer <PRYSM_CRON_SECRET>`. Adicione os segredos `PRYSM_DEPLOYMENT_URL` e `PRYSM_CRON_SECRET` em GitHub → Settings → Secrets and variables → Actions para habilitar o workflow de monitoramento a cada 10 minutos. A Vercel Functions é stateless; não mantenha um loop infinito dentro de uma função.
 
 ## Limites atuais
 
