@@ -20,6 +20,8 @@ export default async function handler(req, res) {
     ]);
     const uptime = await sql`SELECT system_key,
       ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'ok') / NULLIF(COUNT(*), 0), 2) AS uptime_24h,
+      ROUND(AVG(duration_ms))::int AS avg_latency_ms,
+      (array_agg(status ORDER BY created_at DESC))[1] AS last_status,
       MAX(created_at) AS last_check
       FROM telemetry_events WHERE event_type = 'http.check' AND created_at >= NOW() - INTERVAL '24 hours'
       GROUP BY system_key`;
