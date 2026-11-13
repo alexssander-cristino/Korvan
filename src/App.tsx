@@ -192,22 +192,38 @@ export default function App() {
   </div>;
 }
 
+
 function PerformanceCharts({events,systems,uptimeByKey}:{events:Event[];systems:System[];uptimeByKey:Map<string,{uptime_24h:number;avg_latency_ms:number|null;last_status:"ok"|"warning"|"error";last_check:string}>}){
-  const recent=[...events].sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime()).slice(-30);
-  const latencyValues=recent.filter(e=>e.duration_ms!=null).map(e=>Number(e.duration_ms));
-  const maxLatency=Math.max(1,...latencyValues);
-  const points=latencyValues.map((value,index)=>({x:36+(index/Math.max(1,latencyValues.length-1))*648,y:166-(value/maxLatency)*132,value}));
-  const linePath=points.map((point,index)=>(index===0?"M":"L")+" "+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
-  const statusCounts=[{key:"ok",label:"Operacionais",count:events.filter(e=>e.status==="ok").length,color:"var(--green)"},{key:"warning",label:"Atenção",count:events.filter(e=>e.status==="warning").length,color:"var(--amber)"},{key:"error",label:"Falhas",count:events.filter(e=>e.status==="error").length,color:"var(--red)"}];
-  const totalStatus=statusCounts.reduce((sum,item)=>sum+item.count,0);
-  const bars=systems.map(system=>({name:system.name,uptime:uptimeByKey.get(system.system_key)?.uptime_24h??null,latency:uptimeByKey.get(system.system_key)?.avg_latency_ms??null})).filter(item=>item.uptime!=null);
-  return <section className="performance-charts">
-    <article className="chart-panel latency-chart"><div className="chart-heading"><div><h3>Latência ao longo do tempo</h3><p>Últimas 30 verificações com duração registrada</p></div><span className="chart-legend"><i/> Latência (ms)</span></div>
-      {points.length<2?<div className="chart-empty">Ainda não há verificações suficientes para desenhar a tendência.</div>:<div className="line-chart-wrap"><svg viewBox="0 0 720 205" role="img" aria-label="Gráfico de linha da latência nas últimas verificações" preserveAspectRatio="none"><defs><linearGradient id="latencyFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0%" stopColor="var(--cyan)" stopOpacity=".24"/><stop offset="100%" stopColor="var(--cyan)" stopOpacity="0"/></linearGradient></defs>{[34,78,122,166].map(y=><line key={y} x1="36" x2="684" y1={y} y2={y} className="chart-gridline"/>)}<path d={linePath+" L 684 166 L 36 166 Z"} fill="url(#latencyFill)"/><path d={linePath} className="latency-line"/>{points.map((point,index)=><circle key={index} cx={point.x} cy={point.y} r="3.5" className="latency-point"><title>{Math.round(point.value)} ms</title></circle>)}</svg><div className="chart-axis"><span>Mais antigas</span><span>Mais recentes</span></div></div>}
-      <div className="chart-footnote">Pico observado: <b>{latencyValues.length?fmtMs(Math.max(...latencyValues)):"—"}</b><span>Média: <b>{latencyValues.length?fmtMs(latencyValues.reduce((a,b)=>a+b,0)/latencyValues.length):"—"}</b></span></div>
-    </article>
-    <article className="chart-panel"><div className="chart-heading"><div><h3>Disponibilidade por sistema</h3><p>Percentual nas últimas 24 horas</p></div></div>{bars.length?<div className="uptime-bars">{bars.map(item=><div className="uptime-bar-row" key={item.name}><div><b>{item.name}</b><strong>{Number(item.uptime).toFixed(2)}%</strong></div><div className="uptime-track"><i style={{width:(Math.max(0,Math.min(100,Number(item.uptime)))+"%")}}/></div><small>Latência média: {fmtMs(item.latency)}</small></div>)}</div>:<div className="chart-empty">Os sistemas ainda não possuem dados de disponibilidade.</div>}</article>
-    <article className="chart-panel status-chart"><div className="chart-heading"><div><h3>Resultado das verificações</h3><p>Distribuição dos últimos {events.length} registros carregados</p></div></div>{totalStatus?<><div className="status-stack">{statusCounts.map(item=><i key={item.key} style={{width:(item.count/totalStatus*100)+"%",background:item.color}} title={item.label+": "+item.count}/>)}</div><div className="status-breakdown">{statusCounts.map(item=><div key={item.key}><span><i style={{background:item.color}}/>{item.label}</span><b>{item.count}<small>{Math.round(item.count/totalStatus*100)}%</small></b></div>)}</div></>:<div className="chart-empty">Nenhuma verificação registrada ainda.</div>}</article>
+  if(!systems.length)return <section className="systems-card"><div className="chart-empty">Cadastre um sistema para acompanhar seu desempenho.</div></section>;
+  return <section className="system-performance-grid">
+    {systems.map(system=>{
+      const systemEvents=events.filter(event=>event.system_key===system.system_key).sort((a,b)=>new Date(a.created_at).getTime()-new Date(b.created_at).getTime()).slice(-30);
+      const latencyValues=systemEvents.filter(event=>event.duration_ms!=null).map(event=>Number(event.duration_ms));
+      const maxLatency=Math.max(1,...latencyValues);
+      const points=latencyValues.map((value,index)=>({x:30+(index/Math.max(1,latencyValues.length-1))*640,y:154-(value/maxLatency)*120,value}));
+      const linePath=points.map((point,index)=>(index===0?"M":"L")+" "+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
+      const uptime=uptimeByKey.get(system.system_key);
+      const counts={ok:systemEvents.filter(event=>event.status==="ok").length,warning:systemEvents.filter(event=>event.status==="warning").length,error:systemEvents.filter(event=>event.status==="error").length};
+      const total=counts.ok+counts.warning+counts.error;
+      return <article className="system-performance-card" key={system.id}>
+        <div className="system-performance-header">
+          <div className="system-performance-identity"><div className="system-performance-avatar">{system.name.slice(0,2).toUpperCase()}</div><div><h3>{system.name}</h3><span>{system.system_key}</span></div></div>
+          <Status status={!system.enabled?"warning":uptime?.last_status||"pending"}/>
+        </div>
+        <div className="system-performance-metrics">
+          <div><span>Disponibilidade (24h)</span><strong className="performance-uptime">{uptime?Number(uptime.uptime_24h).toFixed(2)+"%":"—"}</strong></div>
+          <div><span>Latência média</span><strong>{fmtMs(uptime?.avg_latency_ms)}</strong></div>
+          <div><span>Verificações</span><strong>{systemEvents.length}</strong></div>
+        </div>
+        <div className="system-chart-heading"><div><b>Histórico de latência</b><span>Últimas 30 verificações deste sistema</span></div><small>{latencyValues.length? "Pico: "+fmtMs(Math.max(...latencyValues)):"Sem medições"}</small></div>
+        {points.length<2?<div className="system-chart-empty">Aguardando verificações suficientes para gerar o gráfico.</div>:<div className="system-line-chart"><svg viewBox="0 0 700 175" role="img" aria-label={"Latência de "+system.name+" nas últimas verificações"} preserveAspectRatio="none">{[34,74,114,154].map(y=><line key={y} x1="30" x2="670" y1={y} y2={y} className="chart-gridline"/>)}<path d={linePath+" L 670 154 L 30 154 Z"} className="system-chart-area"/><path d={linePath} className="latency-line"/>{points.map((point,index)=><circle key={index} cx={point.x} cy={point.y} r="3.2" className="latency-point"><title>{fmtMs(point.value)} · {fmtTime(systemEvents.filter(event=>event.duration_ms!=null)[index]?.created_at)}</title></circle>)}</svg><div className="chart-axis"><span>Mais antigas</span><span>Mais recentes</span></div></div>}
+        <div className="system-performance-footer">
+          <div className="system-status-distribution"><div><span>Operacionais</span><b>{counts.ok}</b></div><div><span>Atenção</span><b>{counts.warning}</b></div><div><span>Falhas</span><b>{counts.error}</b></div></div>
+          <div className="system-status-stack" aria-label="Distribuição dos status">{total>0?<><i className="ok-segment" style={{width:(counts.ok/total*100)+"%"}}/><i className="warning-segment" style={{width:(counts.warning/total*100)+"%"}}/><i className="error-segment" style={{width:(counts.error/total*100)+"%"}}/></>:<span>Sem eventos registrados</span>}</div>
+          <small>Última verificação: {fmtTime(uptime?.last_check)}</small>
+        </div>
+      </article>;
+    })}
   </section>;
 }
 
