@@ -12,11 +12,10 @@ Central privada para monitorar disponibilidade, latência, falhas e eventos dos 
 ## Desenvolvimento local
 
 1. Instale dependências: `npm install`
-2. Instale/tenha o Vercel CLI disponível: `npm install -g vercel`
-3. Copie `.env.example` para `.env.local` e preencha as variáveis.
-4. Execute `npm run dev` (usa `vercel dev`, pois o Vite sozinho não executa as funções de API).
+2. Copie `.env.example` para `.env.local` e preencha as variáveis.
+3. Execute `npm run dev`.
 
-Para abrir somente a interface sem API, use `npm run dev:vite`.
+O comando inicia o Vite e um adaptador local das funções em `api/`, então frontend e API funcionam juntos sem depender do Vercel CLI. Para abrir somente a interface sem API, use `npm run dev:vite`.
 
 ## Variáveis de ambiente
 
