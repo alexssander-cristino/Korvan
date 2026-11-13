@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "method_not_allowed" });
   }
   const expected = process.env.PRYSM_INGEST_TOKEN;
-  const provided = req.headers.authorization?.replace(/^Bearer\\s+/i, "");
+  const provided = req.headers.authorization?.replace(/^Bearer\s+/i, "");
   if (!expected || !sameSecret(expected, provided)) return res.status(401).json({ error: "unauthorized" });
 
   const body = req.body && typeof req.body === "object" ? req.body : {};
