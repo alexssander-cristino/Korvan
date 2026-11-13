@@ -62,7 +62,13 @@ const server = createHttpServer(async (req, res) => {
         },
         setHeader(name, value) { res.setHeader(name, value); },
       };
-      await handlerModule.default({ ...req, body, query }, adapter);
+      await handlerModule.default({
+        method: req.method,
+        headers: req.headers,
+        body,
+        query,
+        url: req.url,
+      }, adapter);
       if (!res.writableEnded) res.end();
     } catch (error) {
       console.error("Local API error:", error);
