@@ -18,7 +18,7 @@ type Event = {
 type Overview = {
   systems: System[];
   stats: { checks_24h: number; errors_24h: number; warnings_24h: number; avg_latency_ms: number | null; p95_latency_ms: number | null };
-  uptime: { system_key: string; uptime_24h: number; last_check: string }[];
+  uptime: { system_key: string; uptime_24h: number; avg_latency_ms: number | null; last_status: "ok" | "warning" | "error"; last_check: string }[];
   activity: Event[];
 };
 type Tab = "overview" | "systems" | "incidents" | "performance" | "workers" | "alerts" | "integrations" | "settings";
@@ -152,7 +152,7 @@ export default function App() {
   const systems=overview?.systems||[];
   const uptimeByKey=useMemo(()=>new Map((overview?.uptime||[]).map(item=>[item.system_key,item])),[overview]);
   const visibleSystems=systems.filter(s=>(s.name+" "+s.system_key+" "+(s.base_url||"")).toLowerCase().includes(search.toLowerCase()));
-  const filteredEvents=events.filter(e=>(statusFilter==="all"||e.status===statusFilter)&&(tab!=="incidents"||e.status!=="ok"));
+  const filteredEvents=events.filter(e=>(statusFilter==="all"||e.status===statusFilter)&&((tab!=="incidents"&&tab!=="alerts")||e.status!=="ok"));
   const title=tabs.find(t=>t.id===tab)?.label||"Visão geral";
 
   if(authenticated===null)return <div className="boot-screen"><div className="brand-mark"><Signal size={20}/></div><span>Iniciando Prysm...</span></div>;
@@ -196,7 +196,7 @@ function Metric({label,value,note,icon:Icon}:{label:string;value:string;note:str
   return <article className="metric-card"><div className="metric-top"><span>{label}</span><span className="metric-icon"><Icon size={17}/></span></div><strong>{value}</strong><small>{note}</small></article>;
 }
 function SystemsTable({systems,uptimeByKey,onEdit}:{systems:System[];uptimeByKey:Map<string,{uptime_24h:number;last_check:string}>;onEdit:(s:System)=>void}){
-  return <section className="systems-card"><div className="system-table"><div className="table-head"><span>SISTEMA</span><span>STATUS</span><span>LATÊNCIA</span><span>DISPONIBILIDADE (24H)</span><span>ENDPOINT</span><span/></div>{systems.map(system=>{const up=uptimeByKey.get(system.system_key);return <div className="system-row" key={system.id}><div className="system-name"><div className={`system-logo ${system.system_key==="menuza"?"orange":system.system_key==="madevix"?"violet":"blue"}`}>{system.name.slice(0,2).toUpperCase()}</div><div><b>{system.name}</b><span>{system.description||system.system_key}</span></div></div><div><Status status={!system.enabled?"warning":up?(Number(up.uptime_24h)>=99?"ok":Number(up.uptime_24h)>=95?"warning":"error"):"pending"}/></div><span className="muted-value">{up?"Verificado": "—"}</span><span className="uptime-placeholder">{up?`${Number(up.uptime_24h).toFixed(2)}%`:"Sem dados"}</span><span className="endpoint">{system.base_url||"URL não configurada"}</span><button className="row-more" onClick={()=>onEdit(system)} aria-label={`Editar ${system.name}`}><Pencil size={16}/></button></div>;})}{systems.length===0&&<div className="empty-table">Nenhum sistema encontrado.</div>}</div><div className="table-footer"><span>Exibindo {systems.length} sistema(s)</span><span className="footer-note"><ShieldCheck size={14}/> Atualizado com dados do banco.</span></div></section>;
+  return <section className="systems-card"><div className="system-table"><div className="table-head"><span>SISTEMA</span><span>STATUS</span><span>LATÊNCIA</span><span>DISPONIBILIDADE (24H)</span><span>ENDPOINT</span><span/></div>{systems.map(system=>{const up=uptimeByKey.get(system.system_key);return <div className="system-row" key={system.id}><div className="system-name"><div className={`system-logo ${system.system_key==="menuza"?"orange":system.system_key==="madevix"?"violet":"blue"}`}>{system.name.slice(0,2).toUpperCase()}</div><div><b>{system.name}</b><span>{system.description||system.system_key}</span></div></div><div><Status status={!system.enabled?"warning":up?up.last_status:"pending"}/></div><span className="muted-value">{fmtMs(up?.avg_latency_ms)}</span><span className="uptime-placeholder">{up?`${Number(up.uptime_24h).toFixed(2)}%`:"Sem dados"}</span><span className="endpoint">{system.base_url||"URL não configurada"}</span><button className="row-more" onClick={()=>onEdit(system)} aria-label={`Editar ${system.name}`}><Pencil size={16}/></button></div>;})}{systems.length===0&&<div className="empty-table">Nenhum sistema encontrado.</div>}</div><div className="table-footer"><span>Exibindo {systems.length} sistema(s)</span><span className="footer-note"><ShieldCheck size={14}/> Atualizado com dados do banco.</span></div></section>;
 }
 function EventList({events}:{events:Event[]}){
   if(!events.length)return <div className="empty-state"><div className="empty-icon"><Activity size={20}/></div><b>Nenhuma atividade registrada</b><span>Execute uma verificação para gerar os primeiros eventos.</span></div>;
